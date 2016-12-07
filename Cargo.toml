@@ -44,6 +44,7 @@ name = "viewer"
 path = "src/viewer/main.rs"
 
 [dependencies]
+cssparser = "*"
 html5ever = "*"
 html5ever-atoms = "*"
 #mime_guess = "*"

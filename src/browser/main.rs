@@ -1,3 +1,4 @@
+#[macro_use] extern crate cssparser;
 #[macro_use] extern crate html5ever_atoms;
 extern crate html5ever;
 //extern crate mime_guess;
@@ -9,9 +10,7 @@ extern crate url;
 
 use std::{cmp, env, str};
 use std::collections::BTreeMap;
-use std::iter::repeat;
 use std::default::Default;
-use std::ffi::OsStr;
 use std::fs::File;
 use std::io::{stderr, Read, Write};
 use std::net::TcpStream;
@@ -23,6 +22,8 @@ use orbclient::{Color, Window, EventOption, K_BKSP, K_ESC, K_LEFT, K_RIGHT, K_DO
 use orbfont::Font;
 use tendril::TendrilSink;
 use url::Url;
+
+static INIT_CSS: &'static str = include_str!("../../res/browser/html.css");
 
 struct Block<'a> {
     x: i32,
@@ -65,7 +66,7 @@ fn text_block<'a>(string: &str, x: &mut i32, y: &mut i32, size: f32, bold: bool,
     let trimmed_right = trimmed_left.trim_right();
     let right_margin = trimmed_left.len() as i32 - trimmed_right.len() as i32;
 
-    let escaped_text = escape_default(&trimmed_right);
+    //let escaped_text = escape_default(&trimmed_right);
     //println!("#text: block {} at {}, {}: '{}'", blocks.len(), *x, *y, escaped_text);
 
     *x += left_margin * 8;
@@ -119,7 +120,7 @@ fn walk<'a>(handle: Handle, indent: usize, x: &mut i32, y: &mut i32, mut size: f
                 //println!("#Document")
             },
 
-        Doctype(ref name, ref public, ref system)
+        Doctype(ref _name, ref _public, ref _system)
             => {
                 //println!("<!DOCTYPE {} \"{}\" \"{}\">", *name, *public, *system);
             },
@@ -688,7 +689,16 @@ fn main_window(arg: &str, font: &Font, font_bold: &Font) {
     }
 }
 
+fn try_css() {
+    let mut parser = cssparser::Parser::new(INIT_CSS);
+    while let Ok(token) = parser.next() {
+        println!("{:?}", token);
+    }
+}
+
 fn main() {
+    try_css();
+
     let err_window = |msg: &str| {
         let mut window = Window::new(-1, -1, 320, 32, "Browser").unwrap();
 
